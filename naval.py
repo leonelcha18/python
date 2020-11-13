@@ -4,7 +4,7 @@ import copy as cy
 
 MAXIMA_DIMENSION = 26
 MINIMA_DIMENSION = 10
-PROBABILIDAD_GANAR_DEFENSA = 0.30
+PROBABILIDAD_GANAR_DEFENSA = 0.90
 
 PROTAGONISTAS = ["Sandokán y sus valientes amigos", "Armada británica"]
 
@@ -34,11 +34,11 @@ def crear_tablero(dimension):
 
     return tablero
 
-def imprimir_tablero(tablero):
+def imprimir_tablero(tablero, defensas, piezas):
     """
     - Imprime la lista de listas 'tablero', se le da formato al output de modo que,
       los títulos de las columnas se correspondan con las letras y las filas, con los números
-    - El parámetro es considerado list
+    - Los parámetros 'tablero', 'defensas' y 'piezas', son considerados listas
     """
     letras = []
 
@@ -56,18 +56,26 @@ def imprimir_tablero(tablero):
 
     for fila in range(len(tablero)):
         if(fila <= 8):
-            print(f"0{fila + 1} |  {'    '.join(tablero[fila])}  |")
+            print(f"0{fila + 1} |  {'    '.join(tablero[fila])}  |    {imprimir_defensas(tablero, defensas, piezas, fila)}")
         else:
-            print(f"{fila + 1} |  {'    '.join(tablero[fila])}  |")
+            print(f"{fila + 1} |  {'    '.join(tablero[fila])}  |    {imprimir_defensas(tablero, defensas, piezas, fila)}")
 
     print(" " * 4 + "-" * len(tablero) * 5)
 
-def imprimir_defensas(tablero, defensas, indice):
+def imprimir_defensas(tablero, defensas, piezas, indice):
+    """
+    - Imprime el estado de las 'defensas', con sus respectivas descripciones recuperadas de 'piezas'. Se contrasta
+      las coordenadas de cada defensa con el 'tablero', con el fin de recuperar el contenido de dicha casilla. 
+    - Los parámetros 'tablero', 'defensas' y 'piezas', son considerados listas e 'indice' como int
+    - Retorna un String
+    """
     estado = ""
 
     if(indice < len(defensas)):
-        for coordenadas in range(defensas[indice]):
-            estado += tablero[defensas[indice][coordenadas]]
+        estado = f"{piezas[indice]}: "
+
+        for coordenadas in range(len(defensas[indice])):
+            estado += f"{tablero[defensas[indice][coordenadas][0]][defensas[indice][coordenadas][1]]} "
 
     return estado
 
@@ -200,7 +208,7 @@ def generar_defensas():
 
 def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
     """
-    - Posicion la 'defensa' en el 'tablero'. La lista 'defensa' guarda relación con la lista constante 'PIEZAS_ORIENTACION'
+    - Posiciona la 'defensa' en el 'tablero'. La lista 'defensa' guarda relación con la lista constante 'PIEZAS_ORIENTACION'
       por lo tanto, con 'indiceDefensa' obtenemos la orientación que le corresponde a dicha 'defensa'. Al misma tiempo
       con el 'protagonista' sabemos que orientaciones le corresponden para sus defensas
     - El parámetro 'tablero' y 'defensa' son considerados listas e 'indiceDefensa' y 'protagonista' como int
@@ -227,18 +235,18 @@ def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
         # - La segunda condición evalua si se está tratando con una defensa con orientación vertical u horizontal
         if(indiceDefensa < len(orientaciones) and orientaciones[indiceDefensa] != ""):
             if(orientaciones[indiceDefensa] == "H"):
-                tablero, defensa = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa)
+                tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado)
 
-                flagPosicionado = verificar_defensa_posicionada(defensa)
+                #flagPosicionado = verificar_defensa_posicionada(defensa)
 
             elif(orientaciones[indiceDefensa] == "V"):
                 tablero = transponer_matriz(tablero)
 
-                tablero, defensa = posicionar_defensa_horizontal(posicionX, posicionY, tablero, defensa)                    
+                tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionX, posicionY, tablero, defensa, flagPosicionado)                    
 
                 tablero = transponer_matriz(tablero)
 
-                flagPosicionado = verificar_defensa_posicionada(defensa)
+                #flagPosicionado = verificar_defensa_posicionada(defensa)
 
                 if(flagPosicionado): defensa = transponer_defensa_coordenadas(defensa)
 
@@ -251,28 +259,28 @@ def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
             
             # Con ubicacion = 0, se posicionará la defensa horizontalmente
             if(ubicacion == 0):
-                tablero, defensa = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa)
+                tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado)
 
-                flagPosicionado = verificar_defensa_posicionada(defensa)
+                # flagPosicionado = verificar_defensa_posicionada(defensa)
             # Caso contrario, se posicionará la defensa verticalmente
             else:
                 tablero = transponer_matriz(tablero)
 
-                tablero, defensa = posicionar_defensa_horizontal(posicionX, posicionY, tablero, defensa)                    
+                tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionX, posicionY, tablero, defensa, flagPosicionado)                    
 
                 tablero = transponer_matriz(tablero)
 
-                flagPosicionado = verificar_defensa_posicionada(defensa)
+                # flagPosicionado = verificar_defensa_posicionada(defensa)
 
                 if(flagPosicionado): defensa = transponer_defensa_coordenadas(defensa)
 
     return tablero, defensa
     
-def posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa):
+def posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado):
     """
     - Posiciona la 'defensa' horizontalmente en el 'tablero', en las coordenadas dadas por 'posicionY' y 'posicionX'
-    - El parámetro 'tablero' y 'defensa' son considerados listas, 'posicionY' y 'posicionX' son int
-    - Retorna dos listas 
+    - El parámetro 'tablero' y 'defensa' son considerados listas, 'posicionY' y 'posicionX' son int, 'flagPosicionado' es boolean
+    - Retorna dos listas y un boolean
     """
     longitudColumnas = 0
     longitudDefensa = 0
@@ -295,13 +303,11 @@ def posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa):
         cantPosLibres = posiciones.count("*")
         cantPosBombardeadas = posiciones.count("#")
 
-        if(cantPosLibres == longitudDefensa):
+        if(cantPosLibres == longitudDefensa or cantPosLibres + cantPosBombardeadas == longitudDefensa):
             tablero, defensa = setear_tablero_y_defensa(posicionY, posicionX, posicionFinal, tablero, defensa)
+            flagPosicionado = True
 
-        elif(cantPosLibres + cantPosBombardeadas == longitudDefensa):
-            tablero, defensa = setear_tablero_y_defensa(posicionY, posicionX, posicionFinal, tablero, defensa)
-
-    return tablero, defensa
+    return tablero, defensa, flagPosicionado
 
 def setear_tablero_y_defensa(posicionY, posicionX, posicionFinal, tablero, defensa):
     """
@@ -373,6 +379,11 @@ def transponer_defensa_coordenadas(defensa):
     return defensaTranspuesta
         
 def verificar_defensa_posicionada(defensa):
+    #FIXME: La validación funciona para defensas con 2 casillas, pero con 1, no cuenta con la lógica
+    #       para determinar si ese tipo de defensa, está posicionada o no. Para este único caso, deberíamos
+    #       pasar como parámetro el 'tablero' y de este modo constatar que en dicha casilla, está ésta defensa
+    
+    #TODO: La función 'posicionar_defensa_horizontal' contaba con una validación propia ¿Podemos descartar ésta función?
     """
     - Verifica que la 'defensa' esté posicionada. Se itera las listas almacenadas en la 'defensa', las cuales representan
       a las coordenadas, y se considerará que una 'defensa' está posicionada, cuando la cantidad de coordenadas (tanto Y e X),
@@ -392,26 +403,27 @@ def verificar_defensa_posicionada(defensa):
 
     cantCeros = posiciones.count(0)
     cantCerosPosibles = len(defensa) + 1
-
+    #TODO: Issue, si no se logra posicionar la defensa de longitud 1, viene con valores [0, 0] y está lógica al validar los ceros nada más, lo deja pasar
     if(cantCeros <= cantCerosPosibles):
         flagPosicionado = True
 
     return flagPosicionado        
 
-def filtrar_defensas_jugador(tablero, defensasOcultar):
+def filtrar_defensas_jugador(tablero, defensasOcultar, defensasJugador, piezasJugador):
     """
     - Imprime el 'tablero', el cual es previamente filtrado para ocultar 'defensasOcultar'
-    - El parámetro 'tablero' y 'defensasOcultar', son considerados listas
+    - El parámetro 'tablero', 'defensasOcultar', 'defensasJugador' y 'piezasJugador' son considerados listas
     """
     # Es necesario hacer una copia profunda de tablero, de otro modo, se podría hacer la copia con
     # tablero[:], pero es necesario iterar los elementos, que al misma tiempo son listas y se debe
     # aplicar también fila[:] 
     tableroFiltrado = cy.deepcopy(tablero)
+    """
     longitudFilas = 0
     longitudColumnas = 0
     
     longitudFilas = len(defensasOcultar) 
-
+    
     for defensa in range(longitudFilas):
         longitudColumnas = len(defensasOcultar[defensa])
 
@@ -421,7 +433,38 @@ def filtrar_defensas_jugador(tablero, defensasOcultar):
 
             if(tableroFiltrado[y][x] == "O"): tableroFiltrado[y][x] = "*"
 
-    imprimir_tablero(tableroFiltrado)
+    longitudFilas = len(defensasJugador)
+
+    for defensa in range(longitudFilas):
+        longitudColumnas = len(defensasJugador[defensa])
+
+        for coordenadas in range(longitudColumnas):
+            y = defensasJugador[defensa][coordenadas][0]
+            x = defensasJugador[defensa][coordenadas][1]
+
+            if(tableroFiltrado[y][x] == "*"): tableroFiltrado[y][x] = "O"    
+    """
+    tableroFiltrado = ocultar_mostrar_defensas(defensasOcultar, tableroFiltrado, "O", "*")
+    tableroFiltrado = ocultar_mostrar_defensas(defensasJugador, tableroFiltrado, "*", "O")
+
+    imprimir_tablero(tableroFiltrado, defensasJugador, piezasJugador)
+
+def ocultar_mostrar_defensas(defensas, tablero, aOcultar, aMostrar):
+    longitudFilas = 0
+    longitudColumnas = 0
+
+    longitudFilas = len(defensas)
+
+    for defensa in range(longitudFilas):
+        longitudColumnas = len(defensas[defensa])
+
+        for coordenadas in range(longitudColumnas):
+            y = defensas[defensa][coordenadas][0]
+            x = defensas[defensa][coordenadas][1]
+
+            if(tablero[y][x] == aOcultar): tablero[y][x] = aMostrar
+
+    return tablero
 
 def definir_primero_jugar(jugador1, jugador2):
     """
@@ -790,7 +833,7 @@ def jugar_turno(tablero, jugador, oponente, defensasPropias, defensasOponente, p
 
     print(f"\nTurno de {PROTAGONISTAS[jugador]}\n")
     print("Defensas propias\n")
-    filtrar_defensas_jugador(tablero, defensasOponente)
+    filtrar_defensas_jugador(tablero, defensasOponente, defensasPropias, piezasDescripcion[jugador])
 
     posicionY = ingresar_fila(posicionY)
     posicionY = validar_fila_elegida(posicionY, tablero)
@@ -820,7 +863,7 @@ def jugar_turno(tablero, jugador, oponente, defensasPropias, defensasOponente, p
     else:
         tablero[posicionY][posicionX] = "#"
 
-    filtrar_defensas_jugador(tablero, defensasOponente)
+    filtrar_defensas_jugador(tablero, defensasOponente, defensasPropias, piezasDescripcion[jugador])
 
     return tablero
 
