@@ -4,7 +4,7 @@ import copy as cy
 
 MAXIMA_DIMENSION = 26
 MINIMA_DIMENSION = 10
-PROBABILIDAD_GANAR_DEFENSA = 0.90
+PROBABILIDAD_GANAR_DEFENSA = 0.30
 
 PROTAGONISTAS = ["Sandokán y sus valientes amigos", "Armada británica"]
 
@@ -15,6 +15,8 @@ PIEZAS_TAMANIO = [6, 3, 2, 2, 1]
 # coincide con la cantidad de elementos en PIEZAS_TAMANIO
 PIEZAS_ORIENTACION = [["H", "V", "H", "V", ""], ["V", "H", "V", "H", ""]]
 
+# PRE: 'dimension' debe ser un número entero positivo mayor o igual a 10 y menor o igual a 26
+# POST: Devuelve una lista de listas, donde 'dimension' representa la cantidad de listas y la longitud de cada lista
 def crear_tablero(dimension):
     """
     - Crea un tablero de dimensiones 'dimension' x 'dimension', y los elementos de dicha matriz
@@ -34,6 +36,11 @@ def crear_tablero(dimension):
 
     return tablero
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensas' es una lista de listas
+#      'piezas' es una lista, que contiene dos listas
+# POST: Imprime el 'tablero' e imprime el estado de las 'defensas', con sus respectivas descripciones,
+#       que se encuentran almacenadas en 'piezas'
 def imprimir_tablero(tablero, defensas, piezas):
     """
     - Imprime la lista de listas 'tablero', se le da formato al output de modo que,
@@ -56,13 +63,19 @@ def imprimir_tablero(tablero, defensas, piezas):
 
     for fila in range(len(tablero)):
         if(fila <= 8):
-            print(f"0{fila + 1} |  {'    '.join(tablero[fila])}  |    {imprimir_defensas(tablero, defensas, piezas, fila)}")
+            print(f"0{fila + 1} |  {'    '.join(tablero[fila])}  |    {obtener_estado_defensa(tablero, defensas, piezas, fila)}")
         else:
-            print(f"{fila + 1} |  {'    '.join(tablero[fila])}  |    {imprimir_defensas(tablero, defensas, piezas, fila)}")
+            print(f"{fila + 1} |  {'    '.join(tablero[fila])}  |    {obtener_estado_defensa(tablero, defensas, piezas, fila)}")
 
     print(" " * 4 + "-" * len(tablero) * 5)
 
-def imprimir_defensas(tablero, defensas, piezas, indice):
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensas' es una lista de listas
+#      'piezas' es una lista, que contiene dos listas
+#      'indice' es un int
+# POST: Devuelve el 'estado' de una de las 'defensas', de acuerdo al 'indice'. Las coordenadas de dicha defensa
+#       se contrastan con el tablero, para verificar si dichas casillas, han sido atacadas o no
+def obtener_estado_defensa(tablero, defensas, piezas, indice):
     """
     - Imprime el estado de las 'defensas', con sus respectivas descripciones recuperadas de 'piezas'. Se contrasta
       las coordenadas de cada defensa con el 'tablero', con el fin de recuperar el contenido de dicha casilla. 
@@ -79,6 +92,9 @@ def imprimir_defensas(tablero, defensas, piezas, indice):
 
     return estado
 
+# PRE: 'dimension' debe ser un String
+# POST: Devuelve 'dimension' validado, de modo que solo tome valores entre las constantes
+#       'MINIMA_DIMENSION' y 'MAXIMA_DIMENSION'
 def validar_dimension(dimension):
     """
     - Valida la variable dimension, de modo que se encuentre entre las constantes
@@ -101,10 +117,12 @@ def validar_dimension(dimension):
             )
             print("\n====== ADVERTENCIA ======\n")
 
-            dimension = ingresar_dimension(dimension)
+            dimension = ingresar_dimension()
 
     return dimension
 
+# PRE: 'opcion' debe ser un String
+# POST: Devuelve 'opcion' validado, de modo que solo tome valores entre 0 y 1
 def validar_opcion(opcion):
     """
     - Valida la variable opcion, de modo que se encuentre entre el 1 y la longitud
@@ -127,10 +145,14 @@ def validar_opcion(opcion):
             )
             print("\n====== ADVERTENCIA ======\n")
 
-            opcion = ingresar_opcion(opcion)
+            opcion = ingresar_opcion()
 
     return opcion      
 
+# PRE: 'numero' debe ser un String
+#      'minimo' y 'maximo' deben ser int. El primero debe ser igual o menor, al segundo.
+# POST: Devuelve el boolean 'esValido', el cual toma su valor determinando si el 'numero' es un int 
+#       y si el 'numero' se encuentra comprendido entre los valores de 'minimo' y 'maximo'
 def validar_numero_acotado(numero, minimo, maximo):
     """
     - Valida que la variable numero supere o iguale el valor de la variable 'minimo'
@@ -148,13 +170,16 @@ def validar_numero_acotado(numero, minimo, maximo):
 
     return esValido
 
-def ingresar_opcion(opcion):
+# PRE: -
+# POST: Imprime la lista constante 'PROTAGONISTAS', solicita ingresar una 'opcion' y la misma es devuelta
+def ingresar_opcion():
     """
     - Imprime los protagonistas almacenados en la lista constante 'PROTAGONISTAS'
     - Capta el ingreso del usuario y almacena el input en la variable 'opcion'
-    - El parámetro 'opcion', es considerado String
     - Retorna un String
     """
+    opcion = ""
+
     print("-------- 1° JUGADOR --------")
     print("\nPersonajes disponibles\n")
 
@@ -165,16 +190,21 @@ def ingresar_opcion(opcion):
 
     return opcion
 
-def ingresar_dimension(dimension):
+# PRE: -
+# POST: Solicita ingresar una 'dimension' y la misma es devuelta
+def ingresar_dimension():
     """
     - Capta el ingreso del usuario y almacena el input en la variable 'dimension'
-    - El parámetro 'dimension', es considerado String
     - Retorna un String
     """
+    dimension = ""
+
     dimension = input("\nIngrese la dimensión para el tablero: ")
 
     return dimension
 
+# PRE: 'rangoMaximo' debe ser int, mayor o igual a 0
+# POST: Devuelve un 'numeroAleatorio', el cual puede tomar valores entre 0 y el 'rangoMaximo' incluido
 def generar_numero_aleatorio(rangoMaximo):
     """
     - Genera un número aleatorio entre el 0 y la variable 'rangoMaximo', incluyendolos
@@ -187,6 +217,9 @@ def generar_numero_aleatorio(rangoMaximo):
 
     return numeroAleatorio
 
+# PRE: -
+# POST: Devuelve una lista de listas, donde cada lista tiene una longitud de elementos, dada por la lista constante
+#       'PIEZAS_TAMANIO'
 def generar_defensas():
     """
     - Genera una lista por cada posicion (x, y), acorde a la lista constante 'PIEZAS_TAMANIO', de una defensa y setea
@@ -206,6 +239,12 @@ def generar_defensas():
 
     return defensas
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensa' debe ser una lista de listas
+#      'indiceDefensa' es un int, guarda relación con 'defensa'
+#      'protagonista' es un int, sólo puede tomar valores entre 0 y 1
+# POST: Devuelve la 'defensa', a la cual se le definió sus coordenadas y el 'tablero', al cual
+#       se le modificó el valor contenido en las coordenadas de la 'defensa'. El valor '*', pasa a 'O'
 def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
     """
     - Posiciona la 'defensa' en el 'tablero'. La lista 'defensa' guarda relación con la lista constante 'PIEZAS_ORIENTACION'
@@ -237,16 +276,12 @@ def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
             if(orientaciones[indiceDefensa] == "H"):
                 tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado)
 
-                #flagPosicionado = verificar_defensa_posicionada(defensa)
-
             elif(orientaciones[indiceDefensa] == "V"):
                 tablero = transponer_matriz(tablero)
 
                 tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionX, posicionY, tablero, defensa, flagPosicionado)                    
 
                 tablero = transponer_matriz(tablero)
-
-                #flagPosicionado = verificar_defensa_posicionada(defensa)
 
                 if(flagPosicionado): defensa = transponer_defensa_coordenadas(defensa)
 
@@ -260,8 +295,6 @@ def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
             # Con ubicacion = 0, se posicionará la defensa horizontalmente
             if(ubicacion == 0):
                 tablero, defensa, flagPosicionado = posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado)
-
-                # flagPosicionado = verificar_defensa_posicionada(defensa)
             # Caso contrario, se posicionará la defensa verticalmente
             else:
                 tablero = transponer_matriz(tablero)
@@ -270,12 +303,18 @@ def posicionar_defensa(tablero, defensa, indiceDefensa, protagonista):
 
                 tablero = transponer_matriz(tablero)
 
-                # flagPosicionado = verificar_defensa_posicionada(defensa)
-
                 if(flagPosicionado): defensa = transponer_defensa_coordenadas(defensa)
 
     return tablero, defensa
     
+# PRE: 'posicionY' y 'posicionX' deben ser int
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensa' debe ser una lista de listas
+#      'flagPosicionado' debe ser un boolean
+# POST: Devuelve la 'defensa', a la cual se le definió sus coordenadas, el 'tablero', al cual
+#       se le modificó el valor contenido en las coordenadas de la 'defensa', el valor '*' pasa a 'O',
+#       y 'flagPosicionado' el cual nos indica, si se pudo posicionar la 'defensa', en el 'tablero',
+#       de manera exitosa
 def posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPosicionado):
     """
     - Posiciona la 'defensa' horizontalmente en el 'tablero', en las coordenadas dadas por 'posicionY' y 'posicionX'
@@ -309,6 +348,11 @@ def posicionar_defensa_horizontal(posicionY, posicionX, tablero, defensa, flagPo
 
     return tablero, defensa, flagPosicionado
 
+# PRE: 'posicionY', 'posicionX', 'posicionFInal' deben ser int
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensa' debe ser una lista de listas
+# POST: Devuelve la 'defensa', a la cual se le definió sus coordenadas y el 'tablero', al cual
+#       se le modificó el valor contenido en las coordenadas de la 'defensa', el valor '*' pasa a 'O',
 def setear_tablero_y_defensa(posicionY, posicionX, posicionFinal, tablero, defensa):
     """
     - Setea en el 'tablero' la 'defensa', en la fila 'posicionY' desde la columna 'posicionX' hasta
@@ -331,6 +375,8 @@ def setear_tablero_y_defensa(posicionY, posicionX, posicionFinal, tablero, defen
 
     return tablero, defensa
 
+# PRE: 'matriz' debe ser una lista de listas de dimensiones n x n
+# POST: Devuelve la 'matriz' tranpuesta, las filas pasan a ser columnas, y las columnas pasan a ser filas
 def transponer_matriz(matriz):
     """
     - Transpone una 'matriz'. Las filas se convierten en columnas, y las columnas en filas
@@ -354,6 +400,9 @@ def transponer_matriz(matriz):
 
     return matrizTranspuesta
 
+# PRE: 'defensa' debe ser una lista de listas
+# POST: Devuelve la 'defensa' tranpuesta, las coordenadas se invierten, es decir, de [x, y]
+#       pasa a ser [y, x]
 def transponer_defensa_coordenadas(defensa):
     """
     - Transpone las coordenadas de una 'defensa'. 'defensa' es una lista de listas, cada lista almacenada en ella
@@ -376,39 +425,13 @@ def transponer_defensa_coordenadas(defensa):
 
         defensaTranspuesta.append(coordenadas)
 
-    return defensaTranspuesta
-        
-def verificar_defensa_posicionada(defensa):
-    #FIXME: La validación funciona para defensas con 2 casillas, pero con 1, no cuenta con la lógica
-    #       para determinar si ese tipo de defensa, está posicionada o no. Para este único caso, deberíamos
-    #       pasar como parámetro el 'tablero' y de este modo constatar que en dicha casilla, está ésta defensa
-    
-    #TODO: La función 'posicionar_defensa_horizontal' contaba con una validación propia ¿Podemos descartar ésta función?
-    """
-    - Verifica que la 'defensa' esté posicionada. Se itera las listas almacenadas en la 'defensa', las cuales representan
-      a las coordenadas, y se considerará que una 'defensa' está posicionada, cuando la cantidad de coordenadas (tanto Y e X),
-      no supere la longitud de la 'defensa' + 1
-    - El parámetro 'defensa', es considerado una lista
-    - Retorna un boolean
-    """
-    # Ej: defensa = [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5]]
-    cantCeros = 0
-    cantCerosPosibles = 0
-    flagPosicionado = False
-    posiciones = []
+    return defensaTranspuesta      
 
-    for coordenada in range(len(defensa)):
-        for elemento in range(len(defensa[coordenada])):
-            posiciones.append(defensa[coordenada][elemento])
-
-    cantCeros = posiciones.count(0)
-    cantCerosPosibles = len(defensa) + 1
-    #TODO: Issue, si no se logra posicionar la defensa de longitud 1, viene con valores [0, 0] y está lógica al validar los ceros nada más, lo deja pasar
-    if(cantCeros <= cantCerosPosibles):
-        flagPosicionado = True
-
-    return flagPosicionado        
-
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensasOcultar' y 'defensasJugador' deben ser listas de listas
+#      'piezasJugador' debe ser una lista
+# POST: Imprime el 'tablero', en el cual se muestra el estado de las 'defensasJugador' y al mismo tiempo,
+#       se ocultan las 'defensasOcultar', que pertenecen al oponente
 def filtrar_defensas_jugador(tablero, defensasOcultar, defensasJugador, piezasJugador):
     """
     - Imprime el 'tablero', el cual es previamente filtrado para ocultar 'defensasOcultar'
@@ -418,38 +441,22 @@ def filtrar_defensas_jugador(tablero, defensasOcultar, defensasJugador, piezasJu
     # tablero[:], pero es necesario iterar los elementos, que al misma tiempo son listas y se debe
     # aplicar también fila[:] 
     tableroFiltrado = cy.deepcopy(tablero)
-    """
-    longitudFilas = 0
-    longitudColumnas = 0
-    
-    longitudFilas = len(defensasOcultar) 
-    
-    for defensa in range(longitudFilas):
-        longitudColumnas = len(defensasOcultar[defensa])
 
-        for coordenadas in range(longitudColumnas):
-            y = defensasOcultar[defensa][coordenadas][0]
-            x = defensasOcultar[defensa][coordenadas][1]
-
-            if(tableroFiltrado[y][x] == "O"): tableroFiltrado[y][x] = "*"
-
-    longitudFilas = len(defensasJugador)
-
-    for defensa in range(longitudFilas):
-        longitudColumnas = len(defensasJugador[defensa])
-
-        for coordenadas in range(longitudColumnas):
-            y = defensasJugador[defensa][coordenadas][0]
-            x = defensasJugador[defensa][coordenadas][1]
-
-            if(tableroFiltrado[y][x] == "*"): tableroFiltrado[y][x] = "O"    
-    """
     tableroFiltrado = ocultar_mostrar_defensas(defensasOcultar, tableroFiltrado, "O", "*")
     tableroFiltrado = ocultar_mostrar_defensas(defensasJugador, tableroFiltrado, "*", "O")
 
     imprimir_tablero(tableroFiltrado, defensasJugador, piezasJugador)
 
+# PRE: 'defensas' debe ser una lista de listas
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+#      'aOcultar' y 'aMostrar', deben ser String
+# POST: Filtra el tablero, de modo que las 'defensas', que toman el valor de 'aOcultar'
+#       en el 'tablero', tomen el valor a 'aMostrar'
 def ocultar_mostrar_defensas(defensas, tablero, aOcultar, aMostrar):
+    """
+    - Los parámetros 'defensas' y 'tablero', son considerados listas, 'aOculstar' y 'aMostrar' son String
+    - Retorna una lista
+    """
     longitudFilas = 0
     longitudColumnas = 0
 
@@ -466,6 +473,8 @@ def ocultar_mostrar_defensas(defensas, tablero, aOcultar, aMostrar):
 
     return tablero
 
+# PRE: 'jugador1' y 'jugador2' deben ser int
+# POST: Retorna el indice, de alguno de los 2 jugadores
 def definir_primero_jugar(jugador1, jugador2):
     """
     - Define quien va a ser el jugador en jugar primero. Se generá un número aleatorio entre 0 y 1,
@@ -484,7 +493,8 @@ def definir_primero_jugar(jugador1, jugador2):
     if(numeroAleatorio == jugador1):
         print("\n<------- ¡Jugador 1 salió sorteado! ------->\n")
 
-        decision = validar_decision(jugador1)
+        decision = ingresar_decision(jugador1)
+        decision = validar_decision(decision, jugador1)
 
         if(decision in opcionesNo):
             jugadorIndice = jugador2
@@ -498,7 +508,8 @@ def definir_primero_jugar(jugador1, jugador2):
     elif(numeroAleatorio == jugador2):
         print("\n<------- ¡Jugador 2 salió sorteado! ------->\n")
 
-        decision = validar_decision(jugador2)
+        decision = ingresar_decision(jugador2)
+        decision = validar_decision(decision, jugador2)
 
         if(decision in opcionesNo):
             jugadorIndice = jugador1
@@ -511,19 +522,19 @@ def definir_primero_jugar(jugador1, jugador2):
 
     return jugadorIndice
 
-def validar_decision(jugador):
+# PRE: 'decision' debe ser un String
+#      'jugador' debe ser int
+# POST: Devuelve 'decision' validado, de modo que solo tome valores de afirmación o negación
+def validar_decision(decision, jugador):
     """
     - Valida la 'decision' ingresada por el 'jugador'. Constata de que únicamente se ingresen valores
       que han sido predefinidos y almacenados en las listas 'opcionesSi' y 'opcionesNo'
-    - El parámetro 'jugador', es considerado int
+    - El parámetro 'jugador', es considerado int y 'decision' como String
     - Retorna un String
     """
-    decision = ""
     opcionesSi = ["SI", "S", "YES", "Y"]
     opcionesNo = ["NO", "N"]
     flagDecision = False
-
-    decision = ingresar_decision(decision, jugador)
 
     while(not flagDecision):
         if(decision in opcionesSi or decision in opcionesNo):
@@ -533,21 +544,28 @@ def validar_decision(jugador):
             print("Las únicas opciones válidas son:", " - ".join(opcionesSi), "-", " - ".join(opcionesNo))
             print("\n====== ADVERTENCIA ======\n")
 
-            decision = ingresar_decision(decision, jugador)
+            decision = ingresar_decision(jugador)
 
     return decision
 
-def ingresar_decision(decision, jugador):
+# PRE: -
+# POST: Solicita ingresar una 'decision' y la misma es devuelta
+def ingresar_decision(jugador):
     """
     - Imprime un mensaje personalizado acorde al 'jugador' y capta la 'decision' del usuario. Dicho input
       se formatea a mayúsculas
     - El parámetro 'jugador', es considera int y 'decision' como String
     - Retorna un String
     """
+    decision = ""
+
     decision = input(f"|Jugador| {PROTAGONISTAS[jugador]} - ¿Desea ser el primero en empezar <S/N>?").upper()
 
     return decision
 
+# PRE: -
+# POST: Devuelve el boolean 'hayPartidaEspecial', el cual tomará un determinado valor, acorde
+#       a si un número aleatorio, se encuentra dentro del rango de la constante 'PROBABILIDAD_GANAR_DEFENSA'
 def iniciar_partida_especial():
     """
     - Evalua si se va iniciar una 'partida especial'. Se genera un número aleatorio del 0 al 100, y el mismo
@@ -564,6 +582,11 @@ def iniciar_partida_especial():
 
     return hayPartidaEspecial
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensa' deben ser lista de listas
+# POST: Devuelve el 'tablero', en el cual, se eliminó la visualización de la 'defensa'
+#       ,es decir, aquellas casillas con valor 'O', pasan a ser '*' y las casillas con
+#       con valor 'X', pasan a ser '#'
 def quitar_defensa_tablero(tablero, defensa):
     """
     - Elimina la visualización de la 'defensa' en el 'tablero'. Aquellas coordenadas almacenadas en 'defensa'
@@ -587,6 +610,11 @@ def quitar_defensa_tablero(tablero, defensa):
 
     return tablero
 
+# PRE: 'deDefensas' y 'aDefensas' deben ser lista de listas
+# POST: Devuelve las listas 'deDefensas', 'aDefensas' y el int 'indiceUltimaOcurrencia'.
+#       Se debe sustraer la última defensa de 'deDefensas', es decir, la de menor tamaño,
+#       y se adiciona la misma a 'aDefensas'. 'indiceUltimaOcurrencia' es la posición en donde
+#       se inserto dicha defensa en a 'aDefensas'
 def quitar_sumar_menor_defensa(deDefensas, aDefensas):
     """
     - Sustrae la defensa de menor longitud de 'deDefensas' y la adiciona a 'aDefensas'. Se tiene en consideración que,
@@ -632,6 +660,10 @@ def quitar_sumar_menor_defensa(deDefensas, aDefensas):
 
     return deDefensas, aDefensas, indiceUltimaOcurrencia
 
+# PRE: 'posicionY' debe ser un String
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+# POST: Devuelve 'posicionY' validado, de modo que solo tome valores entre 1
+#       y la longitud del 'tablero'
 def validar_fila_elegida(posicionY, tablero):
     """
     - Valida la 'posicionY' ingresada por el jugador. Constata de que únicamente se ingresen valores
@@ -654,20 +686,27 @@ def validar_fila_elegida(posicionY, tablero):
             )
             print("\n====== ADVERTENCIA ======\n")
 
-            posicionY = ingresar_fila(posicionY)
+            posicionY = ingresar_fila()
 
     return posicionY
 
-def ingresar_fila(posicionY):
+# PRE: -
+# POST: Solicita ingresar una 'fila' y la misma es devuelta
+def ingresar_fila():
     """
     - Solicita el ingreso de la fila de la casilla a atacar
-    - El parámetro es considerado String
     - Retorn un String
     """
+    posicionY = ""
+
     posicionY = input("Ingrese la fila de la casilla a la que desee atacar: ")
 
     return posicionY
 
+# PRE: 'posicionX' debe ser un String
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+# POST: Devuelve 'letraIndice', que es 'posicionX' validado, de modo que solo tome valores entre 1
+#       y la longitud del 'tablero'
 def validar_columna_elegida(posicionX, tablero):
     """
     - Valida la 'posicionX' ingresada por el jugador. Constata de que únicamente se ingresen valores
@@ -701,21 +740,28 @@ def validar_columna_elegida(posicionX, tablero):
             print("Recuerde que únicamente son válidas las letras del abecedario")
             print("\n====== ADVERTENCIA ======\n")
 
-        if(not flagValido): posicionX = ingresar_columna(posicionX)
+        if(not flagValido): posicionX = ingresar_columna()
 
     return letraIndice
 
-def ingresar_columna(posicionX):
+# PRE: -
+# POST: Solicita ingresar una 'columna' y la misma es devuelta
+def ingresar_columna():
     """
     - Solicita el ingreso de la columna de la casilla a atacar
-    - El parámetro es considerado String
     - Retorn un String
     """
+    posicionX = ""
 
     posicionX = input("Ingrese la columna de la casilla a la que desee atacar: ").upper()
 
     return posicionX
 
+# PRE: 'posicionY' y 'posicionX', deben ser int
+#      'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensasPropias' debe ser una lista de listas
+# POST: Devuelve 'posicionY' y 'posicionX' validados, de modo que solo tomen valores del 'tablero'
+#       donde no se encuentren ubicadas 'defensasnPropias'
 def validar_casilla_elegida(posicionY, posicionX, tablero, defensasPropias):
     """
     - Valida que la 'posicionY' y la 'posicionX' ingresadas por el jugador, es decir, la casilla en el 'tablero', 
@@ -743,11 +789,11 @@ def validar_casilla_elegida(posicionY, posicionX, tablero, defensasPropias):
             print("\n====== ADVERTENCIA ======\n")
 
         if(not flagValido):
-            posicionY = ingresar_fila(posicionY)
+            posicionY = ingresar_fila()
             posicionY = validar_fila_elegida(posicionY, tablero)
             posicionY = int(posicionY) - 1
 
-            posicionX = ingresar_columna(posicionX)
+            posicionX = ingresar_columna()
             posicionX = validar_columna_elegida(posicionX, tablero)
             posicionX = int(posicionX) - 1
 
@@ -755,6 +801,10 @@ def validar_casilla_elegida(posicionY, posicionX, tablero, defensasPropias):
 
     return posicionY, posicionX
 
+# PRE: 'posicionY' y 'posicionX', deben ser int
+#      'defensas' debe ser una lista de listas
+# POST: Devuelve el indice de alguna defensa de 'defensas', que tenga como
+#       coordenadas 'posicionY' y 'posicionX', caso contrario, devuelve ""
 def encontrar_indice_defensa(posicionY, posicionX, defensas):
     """
     - Verifica si en las 'defensas' hay algunas coordenada que coincida con la 'posicionY' y la 'posicionX',
@@ -771,6 +821,11 @@ def encontrar_indice_defensa(posicionY, posicionX, defensas):
 
     return defensaIndice
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensa' debe ser una lista de listas
+# POST: Devuelve el boolean 'estaDestruida', la cual toma su valor, si en todas
+#       las coordenadas de la 'defensa', que se contrastan en el 'tablero', están
+#       marcadas con una 'X', es decir, si fueron destruidas
 def verificar_defensa_destruida(tablero, defensa):
     """
     - Verifica, acorde al 'tablero', si en las coordenadas de la 'defensa', está marcada con una "X", 
@@ -795,6 +850,11 @@ def verificar_defensa_destruida(tablero, defensa):
 
     return estaDestruida
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'defensas' debe ser una lista de listas
+# POST: Devuelve el boolean 'estasDestruida', la cual toma su valor, si en todas
+#       las coordenadas de las 'defensas', que se contrastan en el 'tablero', están
+#       marcadas con una 'X', es decir, si fueron destruidas
 def verificar_defensas_destruidas(tablero, defensas):
     """
     - Verifica, acorde al 'tablero', si en las coordenadas de las 'defensas', están marcadas con una "X", 
@@ -817,6 +877,17 @@ def verificar_defensas_destruidas(tablero, defensas):
 
     return estanDestruidas
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'jugador' y 'oponente', deben ser int
+#      'defensasPropias' y 'defensasOponente', deben ser listas de listas
+#      'piezasDescripcion' debe ser una lista de dos listas
+# POST: Devuelve el 'tablero', el cual se vio modificado por el 'jugador'
+#       de modo que, las coordenadas que haya elegido, de encontrarse alguna defensa
+#       de 'defensasOponente', se informará si se 'IMPACTÓ' o si se 'DESTRUYO', a la vez
+#       a partir de 'piezasDescripcion' del 'oponente', se recuperará la descripción del objetivo
+#       destruido. También mostrará el 'tablero' filtrado, en el cual se ocultarán las defensas
+#       del oponente, que no hayan sido atacadas y mostrar las defensas del jugador, ya sea si
+#       fueron atacadas o no
 def jugar_turno(tablero, jugador, oponente, defensasPropias, defensasOponente, piezasDescripcion):
     """
     - Lógica dura del juego. Muestra el 'tablero' filtrado con las 'defensasPropias' del 'jugador'. Se solicita la posición de una casilla al 'jugador'
@@ -835,11 +906,11 @@ def jugar_turno(tablero, jugador, oponente, defensasPropias, defensasOponente, p
     print("Defensas propias\n")
     filtrar_defensas_jugador(tablero, defensasOponente, defensasPropias, piezasDescripcion[jugador])
 
-    posicionY = ingresar_fila(posicionY)
+    posicionY = ingresar_fila()
     posicionY = validar_fila_elegida(posicionY, tablero)
     posicionY = int(posicionY) - 1
 
-    posicionX = ingresar_columna(posicionX)
+    posicionX = ingresar_columna()
     posicionX = validar_columna_elegida(posicionX, tablero)
     posicionX = int(posicionX) - 1
 
@@ -867,6 +938,11 @@ def jugar_turno(tablero, jugador, oponente, defensasPropias, defensasOponente, p
 
     return tablero
 
+# PRE: 'deJugador', 'aJugador' e 'indiceDescripcion', deben ser int
+#      'piezasDescripcion' debe ser una lista de dos listas
+# POST: Devuelve 'piezasDescripcion', el cual se vio modificado, ya que una de las piezas
+#       de 'deJugador' se sustrae y se adiciona a 'aJugador', en la posición indicada por
+#       'indiceDescripcion'
 def quitar_sumar_descripcion_menor_defensa(deJugador, aJugador, indiceDescripcion, piezasDescripcion):
     """
     - Quita la descripción en 'piezasDescripcion' que le corresponde a 'deJugador' y agrega esa descripción
@@ -881,22 +957,28 @@ def quitar_sumar_descripcion_menor_defensa(deJugador, aJugador, indiceDescripcio
 
     return piezasDescripcion
 
+# PRE: 'tablero' debe ser una lista de listas de dimensiones n x n
+#      'jugador', 'oponente' e 'indiceGanador', deben ser int
+#      'defensasJug' y 'defensasOpo', deben ser listas de listas
+#      'flagHayGanador' debe ser un boolean
+#      'piezasDescripcion' debe ser una lista de dos listas
+# POST: 
 def iniciar_turno(tablero, jugador, oponente, defensasJug, defensasOpo, indiceGanador, flagHayGanador, piezasDescripcion):
     if(not flagHayGanador):
-        if(iniciar_partida_especial()):
-            indiceNuevaDefensa = 0
-
-            print("¡Hay ronda especial!")
-
-            tablero = quitar_defensa_tablero(tablero, defensasOpo[-1])
-            defensasOpo, defensasJug, indiceNuevaDefensa = quitar_sumar_menor_defensa(defensasOpo, defensasJug)
-            piezasDescripcion = quitar_sumar_descripcion_menor_defensa(oponente, jugador, indiceNuevaDefensa, piezasDescripcion)
-            tablero, defensasJug[indiceNuevaDefensa] = posicionar_defensa(tablero, defensasJug[indiceNuevaDefensa], indiceNuevaDefensa, jugador)
-
         if((verificar_defensas_destruidas(tablero, defensasOpo) or len(defensasOpo) == 0)):
             flagHayGanador = True
             indiceGanador = jugador
         else:
+            if(iniciar_partida_especial()):
+                indiceNuevaDefensa = 0
+
+                print("¡Hay ronda especial!")
+
+                tablero = quitar_defensa_tablero(tablero, defensasOpo[-1])
+                defensasOpo, defensasJug, indiceNuevaDefensa = quitar_sumar_menor_defensa(defensasOpo, defensasJug)
+                piezasDescripcion = quitar_sumar_descripcion_menor_defensa(oponente, jugador, indiceNuevaDefensa, piezasDescripcion)
+                tablero, defensasJug[indiceNuevaDefensa] = posicionar_defensa(tablero, defensasJug[indiceNuevaDefensa], indiceNuevaDefensa, jugador)
+
             tablero = jugar_turno(tablero, jugador, oponente, defensasJug, defensasOpo, piezasDescripcion)
 
     return tablero, defensasJug, defensasOpo, indiceGanador, flagHayGanador, piezasDescripcion
@@ -917,7 +999,7 @@ def main():
     # Guarda relación con los protagonistas, y la cantidad de elementos que se les asigna como defensas
     piezasDescripcion = [["Fuerte", "Campamento de defensa", "Depósito de armas", "Defensa Norte", "Defensa Sur"], ["Crucero pesado", "Galeón", "Cañonero", "Galera", "Barcaza"]]
 
-    opcion = ingresar_opcion(opcion)
+    opcion = ingresar_opcion()
     opcion = validar_opcion(opcion)
     jugador1 = int(opcion) - 1
 
@@ -930,7 +1012,7 @@ def main():
 
             print("2° JUGADOR ------>", PROTAGONISTAS[indice])
 
-    dimension = ingresar_dimension(dimension)
+    dimension = ingresar_dimension()
     dimension = validar_dimension(dimension)
     dimension = int(dimension)
 
